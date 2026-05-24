@@ -213,6 +213,23 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .note{background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.2);border-radius:10px;padding:11px 13px;font-size:.77rem;color:var(--muted);line-height:1.6;}
     .note strong{color:var(--text);}
+    /* ══ VALORISATION ══ */
+    .valo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+    @media(max-width:500px){.valo-grid{grid-template-columns:1fr;}}
+    .valo-input-group>label{display:block;font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    .valo-input-wrap{position:relative;display:flex;align-items:center;}
+    .valo-input-wrap input{width:100%;background:var(--surface);border:2px solid rgba(0,212,170,.25);border-radius:10px;color:var(--accent2);font-size:1.3rem;font-weight:800;padding:11px 44px 11px 13px;outline:none;transition:border-color .2s;}
+    .valo-input-wrap input:focus{border-color:var(--accent2);}
+    .valo-input-wrap .unit{position:absolute;right:12px;font-size:.9rem;color:var(--muted);pointer-events:none;}
+    .valo-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+    @media(max-width:560px){.valo-kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    .kpi-value.positive{color:var(--accent2);} .kpi-value.negative{color:var(--accent3);}
+    .valo-hint{font-size:.68rem;color:var(--muted);margin-top:5px;line-height:1.5;}
+    .valo-hint a{color:var(--accent);text-decoration:none;}
+    .valo-hint a:hover{text-decoration:underline;}
+    .btn-autofill{background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.3);border-radius:7px;color:var(--accent);font-size:.71rem;font-weight:600;padding:5px 10px;cursor:pointer;transition:all .2s;margin-top:7px;white-space:nowrap;}
+    .btn-autofill:hover{background:rgba(108,99,255,.25);}
+    .valo-last-update{font-size:.65rem;color:var(--muted);text-align:right;margin-top:10px;font-style:italic;}
     footer{text-align:center;color:var(--muted);font-size:.68rem;margin-top:4px;}
   </style>
 </head>
@@ -358,6 +375,40 @@
     </div>
   </div>
   <div class="card">
+    <div class="card-title">💹 Valorisation du portefeuille</div>
+    <div class="valo-grid">
+      <div class="valo-input-group">
+        <label>Cours actuel de l'ETF (€)</label>
+        <div class="valo-input-wrap">
+          <input type="number" id="valoCours" placeholder="0.00" min="0" step="0.01" oninput="saveValoData()"/>
+          <span class="unit">€</span>
+        </div>
+        <div class="valo-hint">
+          Saisie manuelle · Cours en direct :
+          <a href="https://www.google.com/finance/quote/WPEA:EPA" target="_blank" rel="noopener">🔍 WPEA</a>
+          &nbsp;·&nbsp;
+          <a href="https://www.google.com/finance/quote/CW8:EPA" target="_blank" rel="noopener">CW8</a>
+          sur Google Finance
+        </div>
+      </div>
+      <div class="valo-input-group">
+        <label>Nombre de parts total</label>
+        <div class="valo-input-wrap">
+          <input type="number" id="valoParts" placeholder="0.0000" min="0" step="0.0001" oninput="saveValoData()"/>
+          <span class="unit">parts</span>
+        </div>
+        <button class="btn-autofill" onclick="autofillParts()">↻ Calculer depuis mes achats</button>
+      </div>
+    </div>
+    <div class="valo-kpi-grid">
+      <div class="kpi"><div class="kpi-label">📦 Valeur actuelle</div><div class="kpi-value white" id="vkpiValeur">—</div></div>
+      <div class="kpi"><div class="kpi-label">💸 Plus-value €</div><div class="kpi-value white" id="vkpiPvEur">—</div></div>
+      <div class="kpi"><div class="kpi-label">📊 Plus-value %</div><div class="kpi-value white" id="vkpiPvPct">—</div></div>
+      <div class="kpi"><div class="kpi-label">⚖️ Prix de revient</div><div class="kpi-value purple" id="vkpiPru">—</div></div>
+    </div>
+    <div class="valo-last-update" id="valoLastUpdate"></div>
+  </div>
+  <div class="card">
     <div class="card-title">Enregistrer un achat</div>
     <div class="add-form">
       <div class="form-group"><label>Date</label><input type="date" id="fDate"/></div>
@@ -401,6 +452,8 @@ const { createClient } = window.supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let realtimeChannel = null;
+let lastPurchasesData = [];
+let peaTotal = 0;
 
 // ── Auth ──────────────────────────────────────
 async function initAuth() {
@@ -426,6 +479,7 @@ function showApp() {
   document.getElementById('userEmail').textContent    = currentUser.email;
   document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
   updateMain();
+  loadValoData();
   subscribeToChanges();
   renderPurchases();
 }
@@ -673,11 +727,13 @@ async function renderPurchases() {
   c.innerHTML='<div class="loading"><span class="spinner"></span>Chargement…</div>';
   const { data,error }=await db.from('purchases').select('*').order('date',{ascending:false});
   if (error) { c.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div>Erreur de chargement.<br><small>${error.message}</small></div>`; return; }
+  lastPurchasesData = data;
   const total=data.reduce((s,p)=>s+Number(p.amount),0), count=data.length;
+  peaTotal = total;
   document.getElementById('pkpiTotal').textContent=fmt(total);
   document.getElementById('pkpiCount').textContent=count;
   document.getElementById('pkpiLast').textContent=count?new Date(data[0].date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—';
-  if (count===0) { c.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>Aucun achat enregistré.<br>Ajoute ton premier versement DCA !</div>'; return; }
+  if (count===0) { c.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>Aucun achat enregistré.<br>Ajoute ton premier versement DCA !</div>'; updateValo(); return; }
   c.innerHTML=`<div style="overflow-x:auto;"><table class="purchases-table">
     <thead><tr><th>Date</th><th>ETF</th><th>Montant</th><th>Parts</th><th></th></tr></thead>
     <tbody>${data.map(p=>`
@@ -695,6 +751,7 @@ async function renderPurchases() {
       <td colspan="2"></td>
     </tr></tfoot>
   </table></div>`;
+  updateValo();
 }
 
 function subscribeToChanges() {
@@ -703,6 +760,74 @@ function subscribeToChanges() {
     .on('postgres_changes',{event:'*',schema:'public',table:'purchases',filter:`user_id=eq.${currentUser.id}`},
       () => renderPurchases())
     .subscribe();
+}
+
+// ── Valorisation manuelle (localStorage) ──────
+const LS_COURS = 'pea_cours_actuel';
+const LS_PARTS = 'pea_total_parts';
+const LS_TS    = 'pea_valo_ts';
+
+function loadValoData() {
+  const el_c = document.getElementById('valoCours');
+  const el_p = document.getElementById('valoParts');
+  if (el_c) el_c.value = localStorage.getItem(LS_COURS) || '';
+  if (el_p) el_p.value = localStorage.getItem(LS_PARTS) || '';
+  updateValo();
+}
+
+function saveValoData() {
+  const cours = document.getElementById('valoCours').value;
+  const parts = document.getElementById('valoParts').value;
+  localStorage.setItem(LS_COURS, cours);
+  localStorage.setItem(LS_PARTS, parts);
+  localStorage.setItem(LS_TS, new Date().toLocaleString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}));
+  updateValo();
+}
+
+function autofillParts() {
+  const withShares    = lastPurchasesData.filter(p => p.shares && Number(p.shares) > 0);
+  const withoutShares = lastPurchasesData.filter(p => !p.shares || Number(p.shares) === 0);
+  const totalParts    = withShares.reduce((s, p) => s + Number(p.shares), 0);
+  if (totalParts === 0) {
+    alert('Aucun achat avec "Nb de parts" renseigné.\nSaisis le nombre de parts manuellement, ou complète tes achats avec le champ "Nb de parts".');
+    return;
+  }
+  if (withoutShares.length > 0) {
+    const ok = confirm(`⚠️ ${withoutShares.length} achat(s) sans parts renseignées (non comptabilisé(s)).\n\nTotal calculé : ${totalParts.toFixed(4)} parts.\n\nContinuer ?`);
+    if (!ok) return;
+  }
+  document.getElementById('valoParts').value = totalParts.toFixed(4);
+  saveValoData();
+}
+
+function updateValo() {
+  const cours  = parseFloat(document.getElementById('valoCours')?.value) || 0;
+  const parts  = parseFloat(document.getElementById('valoParts')?.value) || 0;
+  const valeur = cours * parts;
+  const pv     = valeur - peaTotal;
+  const pvPct  = peaTotal > 0 ? (pv / peaTotal) * 100 : 0;
+  const pru    = parts  > 0 ? peaTotal / parts : 0;
+  const el_val = document.getElementById('vkpiValeur');
+  const el_pvE = document.getElementById('vkpiPvEur');
+  const el_pvP = document.getElementById('vkpiPvPct');
+  const el_pru = document.getElementById('vkpiPru');
+  const el_ts  = document.getElementById('valoLastUpdate');
+  if (!el_val) return;
+  if (cours > 0 && parts > 0 && peaTotal > 0) {
+    el_val.textContent = fmtDec(valeur);           el_val.className = 'kpi-value white';
+    el_pvE.textContent = (pv >= 0 ? '+' : '') + fmtDec(pv);
+    el_pvE.className   = 'kpi-value ' + (pv >= 0 ? 'positive' : 'negative');
+    el_pvP.textContent = (pvPct >= 0 ? '+' : '') + pvPct.toFixed(2) + ' %';
+    el_pvP.className   = 'kpi-value ' + (pvPct >= 0 ? 'positive' : 'negative');
+    el_pru.textContent = fmtDec(pru) + ' / part'; el_pru.className = 'kpi-value purple';
+  } else {
+    el_val.textContent = '—'; el_val.className = 'kpi-value white';
+    el_pvE.textContent = '—'; el_pvE.className = 'kpi-value white';
+    el_pvP.textContent = '—'; el_pvP.className = 'kpi-value white';
+    el_pru.textContent = '—'; el_pru.className = 'kpi-value purple';
+  }
+  const ts = localStorage.getItem(LS_TS);
+  if (el_ts) el_ts.textContent = ts ? `Cours saisi le ${ts}` : '';
 }
 
 // ── Service Worker ────────────────────────────
