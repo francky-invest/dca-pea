@@ -415,6 +415,7 @@
       <div class="form-group">
         <label>ETF</label>
         <select id="fEtf">
+          <option value="WPEA">WPEA – MSCI World (Amundi)</option>
           <option value="CW8">CW8 – MSCI World</option>
           <option value="EWLD">EWLD – MSCI World</option>
           <option value="PE500">PE500 – S&P 500</option>
@@ -646,7 +647,8 @@ function updateScenarios(){
 
 // ── ETF ───────────────────────────────────────
 const ETF_LIST=[
-  {name:'Amundi MSCI World',ticker:'CW8',isin:'LU1681043599',tag:'monde',tagLabel:'🌍 Monde',perf:8.5,frais:0.38,desc:'~1 500 entreprises mondiales (USA 70 %). Diversification maximale en PEA.',note:'★ Recommandé pour débuter'},
+  {name:'Amundi MSCI World (WPEA)',ticker:'WPEA',isin:'LU1681043599',tag:'monde',tagLabel:'🌍 Monde',perf:8.5,frais:0.12,desc:'~1 500 entreprises mondiales (USA 70 %). Version récente et moins chère du CW8. Recommandé sur Fortuneo.',note:'★ Recommandé – frais réduits'},
+  {name:'Amundi MSCI World',ticker:'CW8',isin:'LU1681043599',tag:'monde',tagLabel:'🌍 Monde',perf:8.5,frais:0.38,desc:'~1 500 entreprises mondiales (USA 70 %). Diversification maximale en PEA.',note:''},
   {name:'Lyxor MSCI World',ticker:'EWLD',isin:'FR0011869353',tag:'monde',tagLabel:'🌍 Monde',perf:8.3,frais:0.45,desc:'Alternative au CW8, même univers MSCI World. Très liquide sur Euronext.',note:''},
   {name:'Amundi S&P 500',ticker:'PE500',isin:'LU1681048804',tag:'usa',tagLabel:'🇺🇸 USA',perf:10.5,frais:0.15,desc:'500 grandes entreprises américaines. Performance historique élevée.',note:''},
   {name:'BNP Paribas Easy S&P 500',ticker:'ESE',isin:'FR0011550185',tag:'usa',tagLabel:'🇺🇸 USA',perf:10.2,frais:0.15,desc:'ETF S&P 500 PEA synthétique. Frais parmi les plus bas du marché.',note:''},
