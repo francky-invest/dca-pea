@@ -231,6 +231,16 @@
     .btn-autofill{background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.3);border-radius:7px;color:var(--accent);font-size:.71rem;font-weight:600;padding:5px 10px;cursor:pointer;transition:all .2s;margin-top:7px;white-space:nowrap;}
     .btn-autofill:hover{background:rgba(108,99,255,.25);}
     .valo-last-update{font-size:.65rem;color:var(--muted);text-align:right;margin-top:10px;font-style:italic;}
+    /* ══ TIRELIRE ══ */
+    .tl-grid{display:flex;flex-direction:column;gap:7px;margin-bottom:13px;}
+    .tl-row{display:flex;justify-content:space-between;align-items:center;background:var(--surface);border-radius:8px;padding:9px 13px;border:1px solid var(--border);}
+    .tl-row span{font-size:.78rem;color:var(--muted);}
+    .tl-row strong{font-size:.88rem;font-weight:700;color:var(--text);}
+    .tl-row.tl-parts{border-color:rgba(108,99,255,.3);} .tl-row.tl-parts strong{color:var(--accent);}
+    .tl-row.tl-cash{border-color:rgba(255,209,102,.3);} .tl-row.tl-cash strong{color:var(--accent4);}
+    .tl-row.tl-full{border-color:rgba(0,212,170,.3);} .tl-row.tl-full strong{color:var(--accent2);}
+    .tl-note{font-size:.72rem;color:var(--muted);background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:8px;padding:9px 12px;line-height:1.6;}
+    .tl-note strong{color:var(--accent2);}
     footer{text-align:center;color:var(--muted);font-size:.68rem;margin-top:4px;}
   </style>
 </head>
@@ -271,15 +281,15 @@
     <span class="user-email" id="userEmail"></span>
     <button class="btn-logout" onclick="handleLogout()">⏻ Déconnexion</button>
   </div>
-  <div class="badge">PEA · Fortuneo · WSRI 🌿 · DCA</div>
+  <div class="badge">PEA · Fortuneo · PABZ 🌿 · DCA</div>
   <h1>Simulateur d'investissement</h1>
-  <p>Intérêts composés · Scénarios · ETF SRI · Journal synchronisé</p>
+  <p>Intérêts composés · Zone Euro · Accords de Paris · Journal synchronisé</p>
 </header>
 
 <nav>
   <button class="tab-btn active" onclick="showTab('simulator',this)">📈 Simulateur</button>
   <button class="tab-btn" onclick="showTab('scenarios',this)">⚖️ Scénarios</button>
-  <button class="tab-btn" onclick="showTab('etf',this)">🌿 ETF WSRI</button>
+  <button class="tab-btn" onclick="showTab('etf',this)">🌿 ETF PABZ</button>
   <button class="tab-btn" onclick="showTab('purchases',this)">📒 Mon PEA</button>
 </nav>
 
@@ -352,13 +362,13 @@
 <!-- ── Onglet 3 : ETF PEA ── -->
 <div id="tab-etf" class="panel">
 <div class="wrapper">
-  <div class="card"><div class="card-title">🌿 Mon ETF éco-responsable</div><div class="etf-grid" id="etfGrid"></div></div>
+  <div class="card"><div class="card-title">🌿 Mon ETF Zone Euro – Accords de Paris</div><div class="etf-grid" id="etfGrid"></div></div>
   <div class="card" id="etfResult" style="display:none">
-    <div class="card-title">Projection WSRI – 50 €/mois sur 20 ans</div>
+    <div class="card-title">Projection PABZ – 50 €/mois sur 20 ans</div>
     <div class="etf-selected-info" id="etfSelectedInfo"></div>
     <div style="margin-top:14px;"><div class="chart-wrap" style="height:215px;"><canvas id="etfChart"></canvas></div></div>
   </div>
-  <div class="note"><strong>🌿 ETF WSRI – Investissement responsable</strong> — Amundi MSCI World SRI PAB élimine les entreprises impliquées dans les armes, le tabac, le charbon et les hydrocarbures non conventionnels. Sélection ESG stricte (~400 entreprises). Éligible PEA · TER 0,20 %/an · Exonération d'impôt sur les plus-values après 5 ans.</div>
+  <div class="note"><strong>🌿 Amundi S&P Eurozone PAB Net Zero Ambition (PABZ)</strong> — ETF Amundi aligné sur les Accords de Paris (PAB). Réplique les entreprises de la zone euro avec une trajectoire de réduction carbone de −7 %/an. Labellisé ISR · Éligible PEA · ISIN LU2195226068 · TER 0,20 %/an · Prix ≈ 33,50 €/part · Stratégie DCA : 1 part/mois + ~16,50 € en cash · Exonération d'impôt sur les plus-values après 5 ans.</div>
   <footer>Données indicatives · Performances passées ne présagent pas des performances futures</footer>
 </div>
 </div>
@@ -376,6 +386,21 @@
     </div>
   </div>
   <div class="card">
+    <div class="card-title">🐷 Stratégie Tirelire DCA – PABZ</div>
+    <div class="tl-grid">
+      <div class="tl-row"><span>💶 Budget mensuel</span><strong>50,00 €</strong></div>
+      <div class="tl-row"><span>📌 Prix PABZ (référence)</span><strong>33,50 € / part</strong></div>
+      <div class="tl-row tl-parts"><span>🛒 Parts achetées / mois</span><strong>1 part (33,50 €)</strong></div>
+      <div class="tl-row tl-cash"><span>🏦 Cash épargné / mois</span><strong>+ 16,50 €</strong></div>
+      <div class="tl-row tl-full"><span>🎯 Tirelire pleine → 2 parts</span><strong>≥ 67 € (~2 mois)</strong></div>
+    </div>
+    <div class="tl-note">
+      Chaque mois tu achètes <strong>1 part à 33,50 €</strong> et tu laisses <strong>16,50 € en cash</strong> sur ton PEA.
+      Au bout de ~2 mois d'accumulation (≥ 67 €), tu peux acheter <strong>2 parts d'un coup</strong>.
+      Le surplus repart en cash pour le cycle suivant.
+    </div>
+  </div>
+  <div class="card">
     <div class="card-title">💹 Valorisation du portefeuille</div>
     <div class="valo-grid">
       <div class="valo-input-group">
@@ -386,8 +411,8 @@
         </div>
         <div class="valo-hint">
           Saisie manuelle · Cours en direct :
-          <a href="https://www.google.com/finance/quote/WSRI:EPA" target="_blank" rel="noopener">🔍 WSRI sur Google Finance</a>
-          &nbsp;· Prix indicatif actuel ≈ 114 €
+          <a href="https://www.google.com/finance/quote/PABZ:EPA" target="_blank" rel="noopener">🔍 PABZ sur Google Finance</a>
+          &nbsp;· Prix indicatif ≈ 33,50 € · Objectif : 1 part/mois + ~16,50 € cash
         </div>
       </div>
       <div class="valo-input-group">
@@ -414,7 +439,7 @@
       <div class="form-group">
         <label>ETF</label>
         <select id="fEtf">
-          <option value="WSRI">WSRI – MSCI World SRI PAB 🌿</option>
+          <option value="PABZ">PABZ – Amundi S&P Eurozone PAB 🌿</option>
         </select>
       </div>
       <div class="form-group"><label>Montant (€)</label><input type="number" id="fAmount" value="50" min="0.01" step="0.01"/></div>
@@ -638,7 +663,7 @@ function updateScenarios(){
 
 // ── ETF ───────────────────────────────────────
 const ETF_LIST=[
-  {name:'Amundi MSCI World SRI PAB',ticker:'WSRI',isin:'LU1861134382',tag:'sri',tagLabel:'🌿 SRI',perf:8.0,frais:0.20,desc:'~400 entreprises mondiales sélectionnées sur critères ESG stricts. Exclut armes, tabac, charbon, hydrocarbures non conventionnels. Labellisé ISR · Éligible PEA · Prix indicatif ≈ 114 €/part.',note:'★ 100 % Éco-responsable – ton choix PEA !'}
+  {name:'Amundi S&P Eurozone PAB Net Zero Ambition',ticker:'PABZ',isin:'LU2195226068',tag:'sri',tagLabel:'🌿 PAB Zone Euro',perf:7.0,frais:0.20,desc:'Entreprises de la zone euro alignées sur les Accords de Paris. Trajectoire −7 %/an de carbone. Labellisé ISR · Éligible PEA · Prix ≈ 33,50 €/part · DCA : 1 part/mois + 16,50 € cash.',note:'★ Ton choix définitif – Éco & Zone Euro'}
 ];
 let selectedEtf=null,etfChartInstance=null;
 
@@ -778,50 +803,4 @@ function autofillParts() {
     return;
   }
   if (withoutShares.length > 0) {
-    const ok = confirm(`⚠️ ${withoutShares.length} achat(s) sans parts renseignées (non comptabilisé(s)).\n\nTotal calculé : ${totalParts.toFixed(4)} parts.\n\nContinuer ?`);
-    if (!ok) return;
-  }
-  document.getElementById('valoParts').value = totalParts.toFixed(4);
-  saveValoData();
-}
-
-function updateValo() {
-  const cours  = parseFloat(document.getElementById('valoCours')?.value) || 0;
-  const parts  = parseFloat(document.getElementById('valoParts')?.value) || 0;
-  const valeur = cours * parts;
-  const pv     = valeur - peaTotal;
-  const pvPct  = peaTotal > 0 ? (pv / peaTotal) * 100 : 0;
-  const pru    = parts  > 0 ? peaTotal / parts : 0;
-  const el_val = document.getElementById('vkpiValeur');
-  const el_pvE = document.getElementById('vkpiPvEur');
-  const el_pvP = document.getElementById('vkpiPvPct');
-  const el_pru = document.getElementById('vkpiPru');
-  const el_ts  = document.getElementById('valoLastUpdate');
-  if (!el_val) return;
-  if (cours > 0 && parts > 0 && peaTotal > 0) {
-    el_val.textContent = fmtDec(valeur);           el_val.className = 'kpi-value white';
-    el_pvE.textContent = (pv >= 0 ? '+' : '') + fmtDec(pv);
-    el_pvE.className   = 'kpi-value ' + (pv >= 0 ? 'positive' : 'negative');
-    el_pvP.textContent = (pvPct >= 0 ? '+' : '') + pvPct.toFixed(2) + ' %';
-    el_pvP.className   = 'kpi-value ' + (pvPct >= 0 ? 'positive' : 'negative');
-    el_pru.textContent = fmtDec(pru) + ' / part'; el_pru.className = 'kpi-value purple';
-  } else {
-    el_val.textContent = '—'; el_val.className = 'kpi-value white';
-    el_pvE.textContent = '—'; el_pvE.className = 'kpi-value white';
-    el_pvP.textContent = '—'; el_pvP.className = 'kpi-value white';
-    el_pru.textContent = '—'; el_pru.className = 'kpi-value purple';
-  }
-  const ts = localStorage.getItem(LS_TS);
-  if (el_ts) el_ts.textContent = ts ? `Cours saisi le ${ts}` : '';
-}
-
-// ── Service Worker ────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}
-
-// ── Init ──────────────────────────────────────
-initAuth();
-</script>
-</body>
-</html>
+    const ok = confirm(`⚠️ ${withoutShares.length} achat(s) sans parts renseignées (non comptabilisé(s)).\n\
