@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>DCA PEA – Simulateur PABZ</title>
+  <title>DCA PEA – Simulateur EPAB</title>
   <link rel="manifest" href="./manifest.json"/>
   <meta name="theme-color" content="#6c63ff"/>
   <meta name="mobile-web-app-capable" content="yes"/>
@@ -219,7 +219,7 @@
     <div class="auth-logo">
       <div class="logo-icon">🌿</div>
       <h1>DCA PEA</h1>
-      <p>Simulateur PABZ · Synchronisé PC &amp; Mobile</p>
+      <p>Simulateur EPAB · Synchronisé PC &amp; Mobile</p>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('login',this)">Connexion</button>
@@ -248,7 +248,7 @@
     <span class="user-email" id="userEmail"></span>
     <button class="btn-logout" onclick="doLogout()">⏻ Déconnexion</button>
   </div>
-  <div class="badge">PEA · Fortuneo · PABZ · DCA</div>
+  <div class="badge">PEA · Fortuneo · EPAB · DCA</div>
   <h1>Mon Simulateur PEA</h1>
   <p>Intérêts composés · Zone Euro · Accords de Paris</p>
   <div class="sync-badge"><span class="sync-dot"></span>Synchronisé PC &amp; Mobile</div>
@@ -335,20 +335,20 @@
     <div class="pabz-hero">
       <div class="pabz-label">🌿 PAB · Zone Euro · ISR · Accords de Paris</div>
       <div class="pabz-name">Amundi S&amp;P Eurozone PAB Net Zero Ambition</div>
-      <div class="pabz-isin">PABZ &nbsp;·&nbsp; ISIN LU2195226068 &nbsp;·&nbsp; Euronext Paris</div>
+      <div class="pabz-isin">EPAB &nbsp;·&nbsp; ISIN LU2195226068 &nbsp;·&nbsp; Euronext Paris</div>
       <div class="pabz-stats">
-        <div class="pabz-stat"><div class="pabz-stat-label">Prix indicatif</div><div class="pabz-stat-value" style="color:var(--accent2)">≈ 33,50 €</div></div>
+        <div class="pabz-stat"><div class="pabz-stat-label">Prix indicatif</div><div class="pabz-stat-value" style="color:var(--accent2)">≈ 40,00 €</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Frais TER</div><div class="pabz-stat-value" style="color:var(--accent4)">0,20 %/an</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Perf. estimée</div><div class="pabz-stat-value" style="color:var(--green)">~7 %/an</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">DCA 50 €/mois</div><div class="pabz-stat-value" style="color:var(--accent)">1 part/mois</div></div>
-        <div class="pabz-stat"><div class="pabz-stat-label">Cash épargné</div><div class="pabz-stat-value" style="color:var(--accent4)">~16,50 €/mois</div></div>
-        <div class="pabz-stat"><div class="pabz-stat-label">Tirelire 2 parts</div><div class="pabz-stat-value" style="color:var(--accent2)">≥ 67 € (~2 mois)</div></div>
+        <div class="pabz-stat"><div class="pabz-stat-label">Cash épargné</div><div class="pabz-stat-value" style="color:var(--accent4)">~10,00 €/mois</div></div>
+        <div class="pabz-stat"><div class="pabz-stat-label">Tirelire 2 parts</div><div class="pabz-stat-value" style="color:var(--accent2)">≥ 30 € (~3 mois)</div></div>
       </div>
       <div class="pabz-desc">ETF Amundi aligné sur les <strong style="color:var(--text)">Accords de Paris (PAB)</strong> — suit les entreprises de la zone euro avec une trajectoire de réduction carbone de −7 %/an. Exclut les secteurs fossiles, armes et tabac. <strong style="color:var(--green)">Labellisé ISR · Éligible PEA</strong>.</div>
     </div>
     <div id="etfProjection"></div>
   </div>
-  <div class="note"><strong>🐷 Stratégie Tirelire DCA</strong> — Avec 50 €/mois tu achètes <strong>1 part à 33,50 €</strong> et tu laisses <strong>16,50 € en cash</strong> sur ton PEA Fortuneo. Au bout de ~2 mois (≥ 67 €), tu achètes <strong>2 parts ce mois-là</strong>. Le surplus repart en cash pour le cycle suivant.</div>
+  <div class="note"><strong>🐷 Stratégie Tirelire DCA</strong> — Avec 50 €/mois tu achètes <strong>1 part à 40,00 €</strong> et tu laisses <strong>10,00 € en cash</strong> sur ton PEA Fortuneo. Au bout de ~3 mois (≥ 30 € en cash), tu achètes <strong>2 parts ce mois-là</strong>. Le surplus repart en cash pour le cycle suivant.</div>
   <footer>Données indicatives · Performances passées ne présagent pas des performances futures</footer>
 </div>
 </div>
@@ -367,27 +367,27 @@
   </div>
 
   <div class="card">
-    <div class="card-title">🐷 Stratégie Tirelire PABZ</div>
+    <div class="card-title">🐷 Stratégie Tirelire EPAB</div>
     <div class="tl-grid">
       <div class="tl-row"><span>💶 Budget mensuel</span><strong>50,00 €</strong></div>
-      <div class="tl-row"><span>📌 Prix PABZ (référence)</span><strong>33,50 € / part</strong></div>
-      <div class="tl-row tl-parts"><span>🛒 Parts achetées / mois</span><strong>1 part (33,50 €)</strong></div>
+      <div class="tl-row"><span>📌 Prix EPAB (référence)</span><strong>40,00 € / part</strong></div>
+      <div class="tl-row tl-parts"><span>🛒 Parts achetées / mois</span><strong>1 part (40,00 €)</strong></div>
       <div class="tl-row tl-cash"><span>🏦 Cash épargné / mois</span><strong>+ 16,50 €</strong></div>
       <div class="tl-row tl-full"><span>🎯 Tirelire pleine → 2 parts</span><strong>≥ 67 € (~2 mois)</strong></div>
     </div>
-    <div class="tl-note">Chaque mois tu achètes <strong>1 part à 33,50 €</strong> et tu laisses <strong>16,50 € en cash</strong> sur ton PEA. Au bout de ~2 mois d'accumulation, tu peux acheter <strong>2 parts d'un coup</strong>. Le surplus repart en cash pour le cycle suivant.</div>
+    <div class="tl-note">Chaque mois tu achètes <strong>1 part à 40,00 €</strong> et tu laisses <strong>10,00 € en cash</strong> sur ton PEA. Au bout de ~3 mois (≥ 30 € en cash), tu peux acheter <strong>2 parts d'un coup</strong>. Le surplus repart en cash pour le cycle suivant.</div>
   </div>
 
   <div class="card">
     <div class="card-title">💹 Valorisation du portefeuille</div>
     <div class="valo-grid">
       <div class="valo-input-group">
-        <label>Cours actuel PABZ (€)</label>
+        <label>Cours actuel EPAB (€)</label>
         <div class="valo-input-wrap">
-          <input type="number" id="valoCours" placeholder="33.50" min="0" step="0.01" oninput="saveValo()"/>
+          <input type="number" id="valoCours" placeholder="40.00" min="0" step="0.01" oninput="saveValo()"/>
           <span class="unit">€</span>
         </div>
-        <div class="valo-hint">Saisie manuelle · <a href="https://www.google.com/finance/quote/PABZ:EPA" target="_blank" rel="noopener">🔍 PABZ sur Google Finance</a> · Réf. ≈ 33,50 €</div>
+        <div class="valo-hint">Saisie manuelle · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 EPAB sur Google Finance</a> · Réf. ≈ 40,00 €</div>
       </div>
       <div class="valo-input-group">
         <label>Nombre de parts total</label>
@@ -408,7 +408,7 @@
   </div>
 
   <div class="card">
-    <div class="card-title">Enregistrer un achat PABZ</div>
+    <div class="card-title">Enregistrer un achat EPAB</div>
     <div class="add-form">
       <div class="form-group"><label>Date</label><input type="date" id="fDate"/></div>
       <div class="form-group"><label>Montant (€)</label><input type="number" id="fAmount" value="50" min="0.01" step="0.01"/></div>
@@ -667,7 +667,7 @@ async function addPurchase(){
   if(!amount||amount<=0){ alert('Montant invalide.'); return; }
   const btn=document.getElementById('btnAdd');
   btn.disabled=true; btn.textContent='…';
-  const { error }=await db.from('purchases').insert([{user_id:currentUser.id,date,etf:'PABZ',amount,shares}]);
+  const { error }=await db.from('purchases').insert([{user_id:currentUser.id,date,etf:'EPAB',amount,shares}]);
   btn.disabled=false; btn.textContent='＋ Ajouter';
   if(error){ alert('Erreur : '+error.message); return; }
   document.getElementById('fShares').value='';
@@ -692,7 +692,7 @@ async function renderPurchases(){
   document.getElementById('pkpiTotal').textContent=fmt(total);
   document.getElementById('pkpiCount').textContent=count;
   document.getElementById('pkpiLast').textContent=count?new Date(data[0].date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—';
-  if(count===0){ c.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>Aucun achat enregistré.<br>Ajoute ton premier versement DCA PABZ !</div>'; updateValo(); return; }
+  if(count===0){ c.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>Aucun achat enregistré.<br>Ajoute ton premier versement DCA EPAB !</div>'; updateValo(); return; }
   c.innerHTML=`<div style="overflow-x:auto;"><table class="purchases-table">
     <thead><tr><th>Date</th><th>ETF</th><th>Montant</th><th>Parts</th><th></th></tr></thead>
     <tbody>${data.map(p=>`
