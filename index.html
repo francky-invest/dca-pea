@@ -386,9 +386,9 @@
       </div>
       <div class="tl-row"><span>📌 Prix EPAB (cours actuel)</span><strong id="tlPrix">—</strong></div>
       <div class="tl-row tl-parts"><span>🛒 Parts achetées / mois</span><strong id="tlParts">—</strong></div>
-      <div class="tl-row tl-cash"><span>🏦 Cash épargné / mois</span><strong id="tlCash">—</strong></div>
+      <div class="tl-row tl-cash"><span>💸 Cash épargné / achat</span><strong id="tlCash">—</strong></div>
       <div class="tl-row tl-pea-cash" id="tlCashRow">
-        <span>💰 Cash disponible PEA</span>
+        <span>💰 Cash cumulé PEA</span>
         <strong style="display:flex;align-items:center;gap:5px;">
           <input type="number" id="tlCashInput" placeholder="0.00" min="0" step="0.01"
             style="width:75px;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.25);color:inherit;font:inherit;font-weight:700;text-align:right;outline:none;padding:0 2px;"
@@ -414,7 +414,7 @@
           <input type="number" id="valoCours" placeholder="40.00" min="0" step="0.01" oninput="saveValo()"/>
           <span class="unit">€</span>
         </div>
-        <div class="valo-hint">Saisie manuelle · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 EPAB sur Google Finance</a> · Réf. ≈ 40,00 €</div>
+        <div class="valo-hint" id="valoHint">Saisie manuelle · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 EPAB sur Google Finance</a> · Réf. ≈ 40,00 €</div>
       </div>
       <div class="valo-input-group">
         <label>Nombre de parts total</label>
@@ -719,10 +719,21 @@ async function renderPurchases(){
   const total=data.reduce((s,p)=>s+Number(p.amount),0), count=data.length;
   peaTotal=total;
   document.getElementById('pkpiTotal').textContent=fmtDec(total);
-  // Calcul automatique du cash PEA : (nb mois × budget) - total achats
+  // Calcul automatique du cash PEA : (nb achats × budget) - total achats
   const autoCash=Math.max(0,+(count*monthlyBudgetDCA-total).toFixed(2));
   const tlCI=document.getElementById('tlCashInput');
   if(tlCI){ tlCI.value=autoCash.toFixed(2); localStorage.setItem(LS_CASH,tlCI.value); }
+  // Auto-calcul du nombre de parts depuis les achats (total / cours actuel)
+  const ep=document.getElementById('valoParts');
+  if(ep&&currentEpabPrice>0&&total>0){
+    const estParts=+(total/currentEpabPrice).toFixed(4);
+    ep.value=estParts; localStorage.setItem(LS_P,ep.value);
+  }
+  // Mise à jour du hint avec le cours actuel
+  const hint=document.getElementById('valoHint');
+  if(hint&&currentEpabPrice>0){
+    hint.innerHTML=`Saisie manuelle · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 EPAB sur Google Finance</a> · Cours actuel : <strong>${fmtDec(currentEpabPrice)}</strong>`;
+  }
   document.getElementById('pkpiCount').textContent=count;
   document.getElementById('pkpiLast').textContent=count?new Date(data[0].date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—';
   if(count===0){ c.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>Aucun achat enregistré.<br>Ajoute ton premier versement DCA EPAB !</div>'; updateValo(); return; }
@@ -783,6 +794,10 @@ function saveValo(){
   updateValo();
   updateTirelire();
   updateEtfTab();
+  if(newCours>0){
+    const hint=document.getElementById('valoHint');
+    if(hint) hint.innerHTML=`Saisie manuelle · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 EPAB sur Google Finance</a> · Cours actuel : <strong>${fmtDec(newCours)}</strong>`;
+  }
 }
 
 function autofillParts(){
