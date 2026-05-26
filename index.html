@@ -345,7 +345,7 @@
       <div class="pabz-stats">
         <div class="pabz-stat"><div class="pabz-stat-label">Cours EPAB <span id="etfCoursSource" style="font-size:.5rem;opacity:.7"></span></div><div class="pabz-stat-value" id="etfPrix" style="color:var(--accent2)">—</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Frais TER</div><div class="pabz-stat-value" style="color:var(--accent4)">0,20 %/an</div></div>
-        <div class="pabz-stat"><div class="pabz-stat-label">Perf. estimée</div><div class="pabz-stat-value" style="color:var(--green)">~7 %/an</div></div>
+        <div class="pabz-stat"><div class="pabz-stat-label">Perf. réelle 1 an</div><div class="pabz-stat-value" id="etfPerf1Y" style="color:var(--green)">—</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label" id="etfDCALabel">DCA mensuel</div><div class="pabz-stat-value" id="etfDCA" style="color:var(--accent)">—</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Cash épargné</div><div class="pabz-stat-value" id="etfCash" style="color:var(--accent4)">—</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Tirelire part supp.</div><div class="pabz-stat-value" id="etfTirelire" style="color:var(--accent2)">—</div></div>
@@ -462,7 +462,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = window.supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null, rtChannel = null, peaTotal = 0, lastData = [];
-let currentEpabPrice = 40, monthlyBudgetDCA = 50;
+let currentEpabPrice = 40, monthlyBudgetDCA = 50, currentEpabPerf1Y = null;
 
 // ══════════════════════════════════
 // AUTH
@@ -890,10 +890,19 @@ function updateTirelireCash(){
 // ══════════════════════════════════
 async function fetchEpabPrice(){
   try{
-    const r=await fetch('https://query1.finance.yahoo.com/v8/finance/chart/EPAB.PA?interval=1d&range=1d',
-      {signal:AbortSignal.timeout?AbortSignal.timeout(5000):undefined});
+    // Fetch mensuel (1 an) : plus fiable pour EPAB.PA que le daily (moins de nulls)
+    const r=await fetch('https://query1.finance.yahoo.com/v8/finance/chart/EPAB.PA?interval=1mo&range=1y',
+      {signal:AbortSignal.timeout?AbortSignal.timeout(6000):undefined});
     const j=await r.json();
     const p=j?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    // Calcul perf 1 an depuis les données mensuelles (12 points, fiable)
+    try{
+      const closes=j?.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[];
+      const valid=closes.filter(v=>v!=null&&v>0);
+      if(valid.length>=2){
+        currentEpabPerf1Y=+((valid[valid.length-1]/valid[0]-1)*100).toFixed(2);
+      }
+    }catch(e2){}
     if(p&&p>0){
       currentEpabPrice=p;
       // Remplir valoCours si vide ou si différent
@@ -956,12 +965,25 @@ function updateTirelire(){
 // ONGLET ETF DYNAMIQUE
 // ══════════════════════════════════
 function updateEtfTab(){
-  const cours=parseFloat(document.getElementById('valoCours')?.value)||currentEpabPrice||40;
+  // Priorité à currentEpabPrice (mis à jour par fetch + loadValo), pas au DOM
+  const cours=currentEpabPrice>0?currentEpabPrice:(parseFloat(document.getElementById('valoCours')?.value)||40);
   const budget=monthlyBudgetDCA;
   const partsPerMonth=Math.floor(budget/cours);
   const cashPerMonth=+(budget-partsPerMonth*cours).toFixed(2);
-  const cashNeeded=+((partsPerMonth+1)*cours-budget).toFixed(2);
+  const cashNeeded=+cours.toFixed(2); // seuil = prix d'une part
   const moisTirelire=cashPerMonth>0?Math.ceil(cashNeeded/cashPerMonth):null;
+  // Perf 1 an
+  const etfPerf1Y=document.getElementById('etfPerf1Y');
+  if(etfPerf1Y){
+    if(currentEpabPerf1Y!==null){
+      const sign=currentEpabPerf1Y>=0?'+':'';
+      etfPerf1Y.textContent=`${sign}${currentEpabPerf1Y} %`;
+      etfPerf1Y.style.color=currentEpabPerf1Y>=0?'var(--green)':'var(--accent3)';
+    } else {
+      etfPerf1Y.textContent='N/A';
+      etfPerf1Y.style.color='var(--muted)';
+    }
+  }
 
   const etfPrix=document.getElementById('etfPrix');
   if(!etfPrix) return;
