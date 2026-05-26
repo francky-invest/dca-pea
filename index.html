@@ -719,6 +719,10 @@ async function renderPurchases(){
   const total=data.reduce((s,p)=>s+Number(p.amount),0), count=data.length;
   peaTotal=total;
   document.getElementById('pkpiTotal').textContent=fmtDec(total);
+  // Calcul automatique du cash PEA : (nb mois × budget) - total achats
+  const autoCash=Math.max(0,+(count*monthlyBudgetDCA-total).toFixed(2));
+  const tlCI=document.getElementById('tlCashInput');
+  if(tlCI){ tlCI.value=autoCash.toFixed(2); localStorage.setItem(LS_CASH,tlCI.value); }
   document.getElementById('pkpiCount').textContent=count;
   document.getElementById('pkpiLast').textContent=count?new Date(data[0].date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—';
   if(count===0){ c.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>Aucun achat enregistré.<br>Ajoute ton premier versement DCA EPAB !</div>'; updateValo(); return; }
