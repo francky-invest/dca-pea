@@ -345,7 +345,15 @@
       <div class="pabz-stats">
         <div class="pabz-stat"><div class="pabz-stat-label">Cours EPAB <span id="etfCoursSource" style="font-size:.5rem;opacity:.7"></span></div><div class="pabz-stat-value" id="etfPrix" style="color:var(--accent2)">—</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Frais TER</div><div class="pabz-stat-value" style="color:var(--accent4)">0,20 %/an</div></div>
-        <div class="pabz-stat"><div class="pabz-stat-label">Perf. réelle 1 an</div><div class="pabz-stat-value" id="etfPerf1Y" style="color:var(--green)">—</div></div>
+        <div class="pabz-stat">
+          <div class="pabz-stat-label">Perf. réelle 1 an ✏️</div>
+          <div style="display:flex;align-items:baseline;gap:3px;">
+            <input type="number" id="etfPerf1YInput" placeholder="—" step="0.01"
+              style="width:68px;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);color:var(--green);font-size:.95rem;font-weight:800;text-align:right;outline:none;padding:0 2px;"
+              oninput="saveEtfPerf1Y()"/>
+            <span style="font-size:.72rem;color:var(--muted);">%/an</span>
+          </div>
+        </div>
         <div class="pabz-stat"><div class="pabz-stat-label" id="etfDCALabel">DCA mensuel</div><div class="pabz-stat-value" id="etfDCA" style="color:var(--accent)">—</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Cash épargné</div><div class="pabz-stat-value" id="etfCash" style="color:var(--accent4)">—</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Tirelire part supp.</div><div class="pabz-stat-value" id="etfTirelire" style="color:var(--accent2)">—</div></div>
@@ -768,13 +776,24 @@ function subscribeRT(){
 // ══════════════════════════════════
 // VALORISATION (localStorage)
 // ══════════════════════════════════
-const LS_C='pabz_cours', LS_P='pabz_parts', LS_T='pabz_ts';
+const LS_C='pabz_cours', LS_P='pabz_parts', LS_T='pabz_ts', LS_PERF='pabz_perf1y';
+
+function saveEtfPerf1Y(){
+  const v=document.getElementById('etfPerf1YInput')?.value||'';
+  localStorage.setItem(LS_PERF,v);
+  const inp=document.getElementById('etfPerf1YInput');
+  if(inp) inp.style.color=parseFloat(v)>=0?'var(--green)':'var(--accent3)';
+}
 
 function loadValo(){
   const ec=document.getElementById('valoCours');
   const ep=document.getElementById('valoParts');
   if(ec) ec.value=localStorage.getItem(LS_C)||'';
   if(ep) ep.value=localStorage.getItem(LS_P)||'';
+  // Charger perf manuelle sauvegardée
+  const savedPerf=localStorage.getItem(LS_PERF)||'';
+  const perfInp=document.getElementById('etfPerf1YInput');
+  if(perfInp&&savedPerf){ perfInp.value=savedPerf; perfInp.style.color=parseFloat(savedPerf)>=0?'var(--green)':'var(--accent3)'; }
   const saved=parseFloat(localStorage.getItem(LS_C))||0;
   if(saved>0) currentEpabPrice=saved;
   const savedCash=localStorage.getItem(LS_CASH)||'';
@@ -978,18 +997,14 @@ function updateEtfTab(){
   const cashPerMonth=+(budget-partsPerMonth*cours).toFixed(2);
   const cashNeeded=+cours.toFixed(2); // seuil = prix d'une part
   const moisTirelire=cashPerMonth>0?Math.ceil(cashNeeded/cashPerMonth):null;
-  // Perf 1 an
-  const etfPerf1Y=document.getElementById('etfPerf1Y');
-  if(etfPerf1Y){
-    if(currentEpabPerf1Y!==null){
-      const sign=currentEpabPerf1Y>=0?'+':'';
-      etfPerf1Y.textContent=`${sign}${currentEpabPerf1Y} %`;
-      etfPerf1Y.style.color=currentEpabPerf1Y>=0?'var(--green)':'var(--accent3)';
-    } else {
-      etfPerf1Y.textContent='N/A';
-      etfPerf1Y.style.color='var(--muted)';
-    }
+  // Perf 1 an — auto si fetch OK, sinon laisse la saisie manuelle
+  const perfInp=document.getElementById('etfPerf1YInput');
+  if(perfInp&&currentEpabPerf1Y!==null){
+    perfInp.value=currentEpabPerf1Y.toFixed(2);
+    perfInp.style.color=currentEpabPerf1Y>=0?'var(--green)':'var(--accent3)';
+    localStorage.setItem(LS_PERF,perfInp.value);
   }
+  // Si null : on ne touche pas le champ → la valeur manuelle persiste
 
   const etfPrix=document.getElementById('etfPrix');
   if(!etfPrix) return;
