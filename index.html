@@ -671,7 +671,9 @@ function updateScenarios(){
 // ══════════════════════════════════
 let etfChartInst=null;
 function renderEtfProjection(){
-  const {labels,invested,total}=dca(50,7,20);
+  const perfInp=document.getElementById('etfPerf1YInput');
+  const rate=parseFloat(perfInp?.value)||7;
+  const {labels,invested,total}=dca(50,rate,20);
   const li=invested[19],lt=total[19];
   document.getElementById('etfProjection').innerHTML=`
     <div style="margin-top:16px;">
@@ -777,12 +779,14 @@ function subscribeRT(){
 // VALORISATION (localStorage)
 // ══════════════════════════════════
 const LS_C='pabz_cours', LS_P='pabz_parts', LS_T='pabz_ts', LS_PERF='pabz_perf1y';
+const FRAIS_ORDRE=0; // Fortuneo Starter : 1er ordre/mois GRATUIT si ≤500€ → DCA 50€ = 0€ de frais
 
 function saveEtfPerf1Y(){
   const v=document.getElementById('etfPerf1YInput')?.value||'';
   localStorage.setItem(LS_PERF,v);
   const inp=document.getElementById('etfPerf1YInput');
   if(inp) inp.style.color=parseFloat(v)>=0?'var(--green)':'var(--accent3)';
+  renderEtfProjection(); // re-calcule le graphique avec le nouveau taux
 }
 
 function loadValo(){
@@ -956,7 +960,7 @@ function updateTirelire(){
   const cours=parseFloat(document.getElementById('valoCours')?.value)||currentEpabPrice||40;
   const budget=monthlyBudgetDCA;
   const partsPerMonth=Math.floor(budget/cours);
-  const cashPerMonth=+(budget-partsPerMonth*cours).toFixed(2);
+  const cashPerMonth=+(budget-partsPerMonth*cours-FRAIS_ORDRE).toFixed(2);
   const cashNeeded=+cours.toFixed(2);
   const moisTirelire=cashPerMonth>0?Math.ceil(cashNeeded/cashPerMonth):null;
 
@@ -971,16 +975,16 @@ function updateTirelire(){
 
   if(partsPerMonth===0){
     if(tlParts) tlParts.textContent='0 part (budget insuffisant)';
-    if(tlCash)  tlCash.textContent='+ '+fmtDec(cashPerMonth);
+    if(tlCash)  tlCash.textContent=`+ ${fmtDec(cashPerMonth)} (frais ${fmtDec(FRAIS_ORDRE)} inclus)`;
     if(tlSeuil) tlSeuil.textContent=moisTirelire?`≥ ${fmtDec(cashNeeded)} (~${moisTirelire} mois)`:'—';
     if(tlNote)  tlNote.innerHTML=`Avec <strong>${fmtDec(budget)}/mois</strong>, le cours actuel de <strong>${fmtDec(cours)}</strong> ne permet pas d'acheter 1 part chaque mois. Tu épargnes <strong>${fmtDec(cashPerMonth)}</strong> de cash par mois. Après ~<strong>${moisTirelire||'?'} mois</strong> tu pourras acheter <strong>1 part</strong>.`;
   } else {
     const partsLabel=partsPerMonth===1?'1 part':`${partsPerMonth} parts`;
     if(tlParts) tlParts.textContent=`${partsLabel} (${fmtDec(partsPerMonth*cours)})`;
-    if(tlCash)  tlCash.textContent=(cashPerMonth>=0?'+ ':'')+fmtDec(cashPerMonth);
+    if(tlCash)  tlCash.textContent=`${cashPerMonth>=0?'+ ':''}${fmtDec(cashPerMonth)} (frais ${fmtDec(FRAIS_ORDRE)} inclus)`;
     const seuilStr=moisTirelire&&moisTirelire>0?`≥ ${fmtDec(cashNeeded)} (~${moisTirelire} mois)`:'Ce mois-ci !';
     if(tlSeuil) tlSeuil.textContent=seuilStr;
-    if(tlNote)  tlNote.innerHTML=`Chaque mois tu achètes <strong>${partsLabel} à ${fmtDec(cours)}</strong> et tu laisses <strong>${fmtDec(cashPerMonth)} en cash</strong> sur ton PEA. Au bout de ~<strong>${moisTirelire||'?'} mois</strong> (≥ ${fmtDec(cashNeeded)} en cash), tu peux acheter <strong>${partsPerMonth+1} parts d'un coup</strong>. Le surplus repart en cash pour le cycle suivant.`;
+    if(tlNote)  tlNote.innerHTML=`Chaque mois tu achètes <strong>${partsLabel} à ${fmtDec(cours)}</strong> et tu laisses <strong>${fmtDec(cashPerMonth)} en cash</strong> sur ton PEA. Au bout de ~<strong>${moisTirelire||'?'} mois</strong> (≥ ${fmtDec(cashNeeded)} en cash), tu passes <strong>1 seul ordre de ${partsPerMonth+1} parts</strong> (${fmtDec((partsPerMonth+1)*cours)}) — toujours gratuit sous Fortuneo Starter. Le surplus repart en cash pour le cycle suivant.`;
   }
   // Mettre à jour le code couleur avec le cash saisi
   updateTirelireCash();
@@ -994,7 +998,7 @@ function updateEtfTab(){
   const cours=currentEpabPrice>0?currentEpabPrice:(parseFloat(document.getElementById('valoCours')?.value)||40);
   const budget=monthlyBudgetDCA;
   const partsPerMonth=Math.floor(budget/cours);
-  const cashPerMonth=+(budget-partsPerMonth*cours).toFixed(2);
+  const cashPerMonth=+(budget-partsPerMonth*cours-FRAIS_ORDRE).toFixed(2);
   const cashNeeded=+cours.toFixed(2); // seuil = prix d'une part
   const moisTirelire=cashPerMonth>0?Math.ceil(cashNeeded/cashPerMonth):null;
   // Perf 1 an — auto si fetch OK, sinon laisse la saisie manuelle
@@ -1003,6 +1007,7 @@ function updateEtfTab(){
     perfInp.value=currentEpabPerf1Y.toFixed(2);
     perfInp.style.color=currentEpabPerf1Y>=0?'var(--green)':'var(--accent3)';
     localStorage.setItem(LS_PERF,perfInp.value);
+    renderEtfProjection(); // graphique mis à jour avec la perf réelle fetchée
   }
   // Si null : on ne touche pas le champ → la valeur manuelle persiste
 
@@ -1019,12 +1024,12 @@ function updateEtfTab(){
   if(etfDCALabel) etfDCALabel.textContent=`DCA ${fmtDec(budget)}/mois`;
   const partsLabel=partsPerMonth===1?'1 part/mois':`${partsPerMonth} parts/mois`;
   if(etfDCA) etfDCA.textContent=partsLabel;
-  if(etfCash) etfCash.textContent=`~${fmtDec(cashPerMonth)}/mois`;
+  if(etfCash) etfCash.textContent=`~${fmtDec(cashPerMonth)}/mois (frais inclus)`;
   if(etfTirelire) etfTirelire.textContent=moisTirelire&&moisTirelire>0?`≥ ${fmtDec(cashNeeded)} (~${moisTirelire} mois)`:'Direct !';
 
   if(etfNote){
     const partsLabelLong=partsPerMonth===1?'1 part':`${partsPerMonth} parts`;
-    etfNote.innerHTML=`<strong>🐷 Stratégie Tirelire DCA</strong> — Avec <strong>${fmtDec(budget)}/mois</strong> tu achètes <strong>${partsLabelLong} à ${fmtDec(cours)}</strong> et tu laisses <strong>${fmtDec(cashPerMonth)} en cash</strong> sur ton PEA Fortuneo. Au bout de ~${moisTirelire||'?'} mois (≥ ${fmtDec(cashNeeded)} en cash), tu achètes <strong>${partsPerMonth+1} parts ce mois-là</strong>. Le surplus repart en cash pour le cycle suivant.`;
+    etfNote.innerHTML=`<strong>🐷 Stratégie Tirelire DCA</strong> — Avec <strong>${fmtDec(budget)}/mois</strong> tu achètes <strong>${partsLabelLong} à ${fmtDec(cours)}</strong> et tu laisses <strong>${fmtDec(cashPerMonth)} en cash</strong> sur ton PEA. Au bout de ~${moisTirelire||'?'} mois (≥ ${fmtDec(cashNeeded)} en cash), tu passes <strong>1 seul ordre de ${partsPerMonth+1} parts</strong> (${fmtDec((partsPerMonth+1)*cours)}) — toujours <strong style="color:var(--green)">0 € de frais</strong> sous Fortuneo Starter (< 500 €). Le surplus repart en cash pour le cycle suivant.`;
   }
 }
 
