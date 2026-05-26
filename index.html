@@ -396,7 +396,7 @@
           €
         </strong>
       </div>
-      <div class="tl-row tl-full" id="tlSeuilRow"><span>🎯 Tirelire pleine → part supp.</span><strong id="tlSeuil">—</strong></div>
+      <div class="tl-row" id="tlSeuilRow"><span>🎯 Tirelire pleine → part supp.</span><strong id="tlSeuil">—</strong></div>
       <div class="tl-progress-wrap" id="tlProgressWrap" style="display:none;">
         <div class="tl-progress-bar" id="tlProgressBar"></div>
       </div>
@@ -830,7 +830,7 @@ function updateTirelireCash(){
   const cours=parseFloat(document.getElementById('valoCours')?.value)||currentEpabPrice||40;
   const budget=monthlyBudgetDCA;
   const partsPerMonth=Math.floor(budget/cours);
-  const cashNeeded=+((partsPerMonth+1)*cours-budget).toFixed(2);
+  const cashNeeded=+cours.toFixed(2);
 
   const cashRow=document.getElementById('tlCashRow');
   const seuilRow=document.getElementById('tlSeuilRow');
@@ -840,34 +840,28 @@ function updateTirelireCash(){
   const statusOk=document.getElementById('tlStatusOk');
   if(!seuilRow) return;
 
-  if(cash<=0){
-    // Pas de cash saisi — affichage neutre
-    if(cashRow) cashRow.className='tl-row tl-pea-cash';
-    seuilRow.className='tl-row tl-full';
-    if(progressWrap) progressWrap.style.display='none';
-    if(statusOk) statusOk.style.display='none';
-    // Remettre le texte seuil normal (déjà mis par updateTirelire)
-    return;
-  }
-
   const pct=Math.min((cash/cashNeeded)*100,100);
-  if(progressWrap) progressWrap.style.display='block';
+  const cashPerMonth=+(budget-partsPerMonth*cours).toFixed(2);
 
   if(cash>=cashNeeded){
     // 🟢 VERT — tirelire pleine !
     if(cashRow) cashRow.className='tl-row tl-ok';
     seuilRow.className='tl-row tl-ok';
     if(tlSeuil) tlSeuil.innerHTML='✅ Tirelire pleine !';
+    if(progressWrap) progressWrap.style.display='block';
     if(progressBar){ progressBar.style.width='100%'; progressBar.style.background='var(--green)'; }
     if(statusOk) statusOk.style.display='block';
   } else {
-    // 🟡 ORANGE — en cours
+    // 🟠 ORANGE — insuffisant (même à 0)
     if(cashRow) cashRow.className='tl-row tl-warn';
     seuilRow.className='tl-row tl-warn';
     const manquant=+(cashNeeded-cash).toFixed(2);
-    const moisRestants=Math.ceil(manquant/(budget-partsPerMonth*cours));
-    if(tlSeuil) tlSeuil.textContent=`${fmtDec(manquant)} manquants (~${moisRestants} mois) · ${pct.toFixed(0)} %`;
-    if(progressBar){ progressBar.style.width=pct+'%'; progressBar.style.background='linear-gradient(to right,var(--accent4),#ffb347)'; }
+    const moisRestants=cashPerMonth>0?Math.ceil(manquant/cashPerMonth):null;
+    if(tlSeuil) tlSeuil.textContent=cash>0
+      ? `${fmtDec(manquant)} manquants (~${moisRestants} mois) · ${pct.toFixed(0)} %`
+      : `≥ ${fmtDec(cashNeeded)} requis (~${moisRestants} mois)`;
+    if(progressWrap) progressWrap.style.display=cash>0?'block':'none';
+    if(progressBar&&cash>0){ progressBar.style.width=pct+'%'; progressBar.style.background='linear-gradient(to right,var(--accent4),#ffb347)'; }
     if(statusOk) statusOk.style.display='none';
   }
 }
@@ -910,7 +904,7 @@ function updateTirelire(){
   const budget=monthlyBudgetDCA;
   const partsPerMonth=Math.floor(budget/cours);
   const cashPerMonth=+(budget-partsPerMonth*cours).toFixed(2);
-  const cashNeeded=+((partsPerMonth+1)*cours-budget).toFixed(2);
+  const cashNeeded=+cours.toFixed(2);
   const moisTirelire=cashPerMonth>0?Math.ceil(cashNeeded/cashPerMonth):null;
 
   const tlPrix=document.getElementById('tlPrix');
