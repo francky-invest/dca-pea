@@ -162,8 +162,14 @@
     .tl-row.tl-parts{border-color:rgba(108,99,255,.3);} .tl-row.tl-parts strong{color:var(--accent);}
     .tl-row.tl-cash{border-color:rgba(255,209,102,.3);} .tl-row.tl-cash strong{color:var(--accent4);}
     .tl-row.tl-full{border-color:rgba(0,212,170,.3);} .tl-row.tl-full strong{color:var(--accent2);}
+    .tl-row.tl-pea-cash{border-color:rgba(108,99,255,.25);} .tl-row.tl-pea-cash strong{color:var(--accent);}
+    .tl-row.tl-warn{border-color:rgba(255,209,102,.45)!important;background:rgba(255,209,102,.06)!important;} .tl-row.tl-warn strong{color:var(--accent4)!important;}
+    .tl-row.tl-ok{border-color:rgba(74,222,128,.45)!important;background:rgba(74,222,128,.07)!important;} .tl-row.tl-ok strong{color:var(--green)!important;}
+    .tl-progress-wrap{border-radius:99px;background:rgba(255,255,255,.07);height:7px;overflow:hidden;margin:4px 0 8px;}
+    .tl-progress-bar{height:100%;border-radius:99px;transition:width .5s ease,background .5s ease;}
     .tl-note{font-size:.73rem;color:var(--muted);background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:9px;padding:10px 13px;line-height:1.65;}
     .tl-note strong{color:var(--accent2);}
+    .tl-status-ok{display:none;font-size:.78rem;font-weight:700;color:var(--green);background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:9px;padding:10px 14px;text-align:center;}
 
     /* Valorisation */
     .valo-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:17px;}
@@ -337,18 +343,18 @@
       <div class="pabz-name">Amundi S&amp;P Eurozone PAB Net Zero Ambition</div>
       <div class="pabz-isin">EPAB &nbsp;·&nbsp; ISIN LU2195226068 &nbsp;·&nbsp; Euronext Paris</div>
       <div class="pabz-stats">
-        <div class="pabz-stat"><div class="pabz-stat-label">Prix indicatif</div><div class="pabz-stat-value" style="color:var(--accent2)">≈ 40,00 €</div></div>
+        <div class="pabz-stat"><div class="pabz-stat-label">Cours EPAB <span id="etfCoursSource" style="font-size:.5rem;opacity:.7"></span></div><div class="pabz-stat-value" id="etfPrix" style="color:var(--accent2)">—</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Frais TER</div><div class="pabz-stat-value" style="color:var(--accent4)">0,20 %/an</div></div>
         <div class="pabz-stat"><div class="pabz-stat-label">Perf. estimée</div><div class="pabz-stat-value" style="color:var(--green)">~7 %/an</div></div>
-        <div class="pabz-stat"><div class="pabz-stat-label">DCA 50 €/mois</div><div class="pabz-stat-value" style="color:var(--accent)">1 part/mois</div></div>
-        <div class="pabz-stat"><div class="pabz-stat-label">Cash épargné</div><div class="pabz-stat-value" style="color:var(--accent4)">~10,00 €/mois</div></div>
-        <div class="pabz-stat"><div class="pabz-stat-label">Tirelire 2 parts</div><div class="pabz-stat-value" style="color:var(--accent2)">≥ 30 € (~3 mois)</div></div>
+        <div class="pabz-stat"><div class="pabz-stat-label" id="etfDCALabel">DCA mensuel</div><div class="pabz-stat-value" id="etfDCA" style="color:var(--accent)">—</div></div>
+        <div class="pabz-stat"><div class="pabz-stat-label">Cash épargné</div><div class="pabz-stat-value" id="etfCash" style="color:var(--accent4)">—</div></div>
+        <div class="pabz-stat"><div class="pabz-stat-label">Tirelire part supp.</div><div class="pabz-stat-value" id="etfTirelire" style="color:var(--accent2)">—</div></div>
       </div>
       <div class="pabz-desc">ETF Amundi aligné sur les <strong style="color:var(--text)">Accords de Paris (PAB)</strong> — suit les entreprises de la zone euro avec une trajectoire de réduction carbone de −7 %/an. Exclut les secteurs fossiles, armes et tabac. <strong style="color:var(--green)">Labellisé ISR · Éligible PEA</strong>.</div>
     </div>
     <div id="etfProjection"></div>
   </div>
-  <div class="note"><strong>🐷 Stratégie Tirelire DCA</strong> — Avec 50 €/mois tu achètes <strong>1 part à 40,00 €</strong> et tu laisses <strong>10,00 € en cash</strong> sur ton PEA Fortuneo. Au bout de ~3 mois (≥ 30 € en cash), tu achètes <strong>2 parts ce mois-là</strong>. Le surplus repart en cash pour le cycle suivant.</div>
+  <div class="note" id="etfNote">Saisis le cours EPAB dans l'onglet Mon PEA → Valorisation pour voir les calculs en temps réel.</div>
   <footer>Données indicatives · Performances passées ne présagent pas des performances futures</footer>
 </div>
 </div>
@@ -369,13 +375,34 @@
   <div class="card">
     <div class="card-title">🐷 Stratégie Tirelire EPAB</div>
     <div class="tl-grid">
-      <div class="tl-row"><span>💶 Budget mensuel</span><strong>50,00 €</strong></div>
-      <div class="tl-row"><span>📌 Prix EPAB (référence)</span><strong>40,00 € / part</strong></div>
-      <div class="tl-row tl-parts"><span>🛒 Parts achetées / mois</span><strong>1 part (40,00 €)</strong></div>
-      <div class="tl-row tl-cash"><span>🏦 Cash épargné / mois</span><strong>+ 10,00 €</strong></div>
-      <div class="tl-row tl-full"><span>🎯 Tirelire pleine → 2 parts</span><strong>≥ 30 € (~3 mois)</strong></div>
+      <div class="tl-row">
+        <span>💶 Budget mensuel</span>
+        <strong style="display:flex;align-items:center;gap:5px;">
+          <input type="number" id="tlBudgetInput" value="50" min="1" step="1"
+            style="width:65px;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.25);color:inherit;font:inherit;font-weight:700;text-align:right;outline:none;padding:0 2px;"
+            oninput="monthlyBudgetDCA=parseFloat(this.value)||50;updateTirelire();updateEtfTab();"/>
+          €
+        </strong>
+      </div>
+      <div class="tl-row"><span>📌 Prix EPAB (cours actuel)</span><strong id="tlPrix">—</strong></div>
+      <div class="tl-row tl-parts"><span>🛒 Parts achetées / mois</span><strong id="tlParts">—</strong></div>
+      <div class="tl-row tl-cash"><span>🏦 Cash épargné / mois</span><strong id="tlCash">—</strong></div>
+      <div class="tl-row tl-pea-cash" id="tlCashRow">
+        <span>💰 Cash disponible PEA</span>
+        <strong style="display:flex;align-items:center;gap:5px;">
+          <input type="number" id="tlCashInput" placeholder="0.00" min="0" step="0.01"
+            style="width:75px;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.25);color:inherit;font:inherit;font-weight:700;text-align:right;outline:none;padding:0 2px;"
+            oninput="savePeaCash();updateTirelireCash()"/>
+          €
+        </strong>
+      </div>
+      <div class="tl-row tl-full" id="tlSeuilRow"><span>🎯 Tirelire pleine → part supp.</span><strong id="tlSeuil">—</strong></div>
+      <div class="tl-progress-wrap" id="tlProgressWrap" style="display:none;">
+        <div class="tl-progress-bar" id="tlProgressBar"></div>
+      </div>
     </div>
-    <div class="tl-note">Chaque mois tu achètes <strong>1 part à 40,00 €</strong> et tu laisses <strong>10,00 € en cash</strong> sur ton PEA. Au bout de ~3 mois (≥ 30 € en cash), tu peux acheter <strong>2 parts d'un coup</strong>. Le surplus repart en cash pour le cycle suivant.</div>
+    <div class="tl-status-ok" id="tlStatusOk">🎯 Tirelire pleine ! Tu peux racheter une part supplémentaire ce mois-ci. 🎉</div>
+    <div class="tl-note" id="tlNote" style="margin-top:10px;">Saisis le cours EPAB dans la section Valorisation pour voir les calculs en temps réel.</div>
   </div>
 
   <div class="card">
@@ -435,6 +462,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = window.supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null, rtChannel = null, peaTotal = 0, lastData = [];
+let currentEpabPrice = 40, monthlyBudgetDCA = 50;
 
 // ══════════════════════════════════
 // AUTH
@@ -462,6 +490,7 @@ function showApp(){
   document.getElementById('fDate').value=new Date().toISOString().split('T')[0];
   updateMain();
   loadValo();
+  fetchEpabPrice();
   subscribeRT();
   renderPurchases();
 }
@@ -523,7 +552,7 @@ function showTab(id,btn){
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
   if(id==='scenarios') updateScenarios();
-  if(id==='etf')       renderEtfProjection();
+  if(id==='etf'){ renderEtfProjection(); updateEtfTab(); }
   if(id==='pea')       renderPurchases();
 }
 
@@ -689,7 +718,7 @@ async function renderPurchases(){
   lastData=data;
   const total=data.reduce((s,p)=>s+Number(p.amount),0), count=data.length;
   peaTotal=total;
-  document.getElementById('pkpiTotal').textContent=fmt(total);
+  document.getElementById('pkpiTotal').textContent=fmtDec(total);
   document.getElementById('pkpiCount').textContent=count;
   document.getElementById('pkpiLast').textContent=count?new Date(data[0].date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—';
   if(count===0){ c.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>Aucun achat enregistré.<br>Ajoute ton premier versement DCA EPAB !</div>'; updateValo(); return; }
@@ -731,14 +760,25 @@ function loadValo(){
   const ep=document.getElementById('valoParts');
   if(ec) ec.value=localStorage.getItem(LS_C)||'';
   if(ep) ep.value=localStorage.getItem(LS_P)||'';
+  const saved=parseFloat(localStorage.getItem(LS_C))||0;
+  if(saved>0) currentEpabPrice=saved;
+  const savedCash=localStorage.getItem(LS_CASH)||'';
+  const tlCI=document.getElementById('tlCashInput');
+  if(tlCI&&savedCash) tlCI.value=savedCash;
   updateValo();
+  updateTirelire();
+  updateEtfTab();
 }
 
 function saveValo(){
+  const newCours=parseFloat(document.getElementById('valoCours').value)||0;
+  if(newCours>0) currentEpabPrice=newCours;
   localStorage.setItem(LS_C,document.getElementById('valoCours').value);
   localStorage.setItem(LS_P,document.getElementById('valoParts').value);
   localStorage.setItem(LS_T,new Date().toLocaleString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}));
   updateValo();
+  updateTirelire();
+  updateEtfTab();
 }
 
 function autofillParts(){
@@ -773,6 +813,163 @@ function updateValo(){
     eR.textContent='—'; eR.className='kpi-value purple';
   }
   if(eT) eT.textContent=localStorage.getItem(LS_T)?`Cours saisi le ${localStorage.getItem(LS_T)}`:'';
+}
+
+// ══════════════════════════════════
+// TIRELIRE — CODE COULEUR CASH PEA
+// ══════════════════════════════════
+const LS_CASH='pabz_cashPEA';
+
+function savePeaCash(){
+  localStorage.setItem(LS_CASH, document.getElementById('tlCashInput')?.value||'');
+}
+
+function updateTirelireCash(){
+  const cashInput=document.getElementById('tlCashInput');
+  const cash=parseFloat(cashInput?.value)||0;
+  const cours=parseFloat(document.getElementById('valoCours')?.value)||currentEpabPrice||40;
+  const budget=monthlyBudgetDCA;
+  const partsPerMonth=Math.floor(budget/cours);
+  const cashNeeded=+((partsPerMonth+1)*cours-budget).toFixed(2);
+
+  const cashRow=document.getElementById('tlCashRow');
+  const seuilRow=document.getElementById('tlSeuilRow');
+  const progressWrap=document.getElementById('tlProgressWrap');
+  const progressBar=document.getElementById('tlProgressBar');
+  const tlSeuil=document.getElementById('tlSeuil');
+  const statusOk=document.getElementById('tlStatusOk');
+  if(!seuilRow) return;
+
+  if(cash<=0){
+    // Pas de cash saisi — affichage neutre
+    if(cashRow) cashRow.className='tl-row tl-pea-cash';
+    seuilRow.className='tl-row tl-full';
+    if(progressWrap) progressWrap.style.display='none';
+    if(statusOk) statusOk.style.display='none';
+    // Remettre le texte seuil normal (déjà mis par updateTirelire)
+    return;
+  }
+
+  const pct=Math.min((cash/cashNeeded)*100,100);
+  if(progressWrap) progressWrap.style.display='block';
+
+  if(cash>=cashNeeded){
+    // 🟢 VERT — tirelire pleine !
+    if(cashRow) cashRow.className='tl-row tl-ok';
+    seuilRow.className='tl-row tl-ok';
+    if(tlSeuil) tlSeuil.innerHTML='✅ Tirelire pleine !';
+    if(progressBar){ progressBar.style.width='100%'; progressBar.style.background='var(--green)'; }
+    if(statusOk) statusOk.style.display='block';
+  } else {
+    // 🟡 ORANGE — en cours
+    if(cashRow) cashRow.className='tl-row tl-warn';
+    seuilRow.className='tl-row tl-warn';
+    const manquant=+(cashNeeded-cash).toFixed(2);
+    const moisRestants=Math.ceil(manquant/(budget-partsPerMonth*cours));
+    if(tlSeuil) tlSeuil.textContent=`${fmtDec(manquant)} manquants (~${moisRestants} mois) · ${pct.toFixed(0)} %`;
+    if(progressBar){ progressBar.style.width=pct+'%'; progressBar.style.background='linear-gradient(to right,var(--accent4),#ffb347)'; }
+    if(statusOk) statusOk.style.display='none';
+  }
+}
+
+// ══════════════════════════════════
+// FETCH COURS EPAB (Yahoo Finance)
+// ══════════════════════════════════
+async function fetchEpabPrice(){
+  try{
+    const r=await fetch('https://query1.finance.yahoo.com/v8/finance/chart/EPAB.PA?interval=1d&range=1d',
+      {signal:AbortSignal.timeout?AbortSignal.timeout(5000):undefined});
+    const j=await r.json();
+    const p=j?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if(p&&p>0){
+      currentEpabPrice=p;
+      // Remplir valoCours si vide ou si différent
+      const ec=document.getElementById('valoCours');
+      if(ec&&(!ec.value||Math.abs(parseFloat(ec.value)-p)>0.005)){
+        ec.value=p.toFixed(2);
+        const ts=new Date().toLocaleString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+        localStorage.setItem(LS_C,ec.value);
+        localStorage.setItem(LS_T,ts);
+        const src=document.getElementById('etfCoursSource');
+        if(src) src.textContent='· auto';
+        const hint=document.querySelector('.valo-hint');
+        if(hint) hint.innerHTML=`Cours récupéré automatiquement · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 EPAB sur Google Finance</a> · Mis à jour : ${ts}`;
+        updateValo();
+      }
+    }
+  }catch(e){ /* fallback silencieux sur cours saisi */ }
+  updateTirelire();
+  updateEtfTab();
+}
+
+// ══════════════════════════════════
+// TIRELIRE DYNAMIQUE
+// ══════════════════════════════════
+function updateTirelire(){
+  const cours=parseFloat(document.getElementById('valoCours')?.value)||currentEpabPrice||40;
+  const budget=monthlyBudgetDCA;
+  const partsPerMonth=Math.floor(budget/cours);
+  const cashPerMonth=+(budget-partsPerMonth*cours).toFixed(2);
+  const cashNeeded=+((partsPerMonth+1)*cours-budget).toFixed(2);
+  const moisTirelire=cashPerMonth>0?Math.ceil(cashNeeded/cashPerMonth):null;
+
+  const tlPrix=document.getElementById('tlPrix');
+  if(!tlPrix) return;
+  tlPrix.textContent=fmtDec(cours)+' / part';
+
+  const tlParts=document.getElementById('tlParts');
+  const tlCash=document.getElementById('tlCash');
+  const tlSeuil=document.getElementById('tlSeuil');
+  const tlNote=document.getElementById('tlNote');
+
+  if(partsPerMonth===0){
+    if(tlParts) tlParts.textContent='0 part (budget insuffisant)';
+    if(tlCash)  tlCash.textContent='+ '+fmtDec(cashPerMonth);
+    if(tlSeuil) tlSeuil.textContent=moisTirelire?`≥ ${fmtDec(cashNeeded)} (~${moisTirelire} mois)`:'—';
+    if(tlNote)  tlNote.innerHTML=`Avec <strong>${fmtDec(budget)}/mois</strong>, le cours actuel de <strong>${fmtDec(cours)}</strong> ne permet pas d'acheter 1 part chaque mois. Tu épargnes <strong>${fmtDec(cashPerMonth)}</strong> de cash par mois. Après ~<strong>${moisTirelire||'?'} mois</strong> tu pourras acheter <strong>1 part</strong>.`;
+  } else {
+    const partsLabel=partsPerMonth===1?'1 part':`${partsPerMonth} parts`;
+    if(tlParts) tlParts.textContent=`${partsLabel} (${fmtDec(partsPerMonth*cours)})`;
+    if(tlCash)  tlCash.textContent=(cashPerMonth>=0?'+ ':'')+fmtDec(cashPerMonth);
+    const seuilStr=moisTirelire&&moisTirelire>0?`≥ ${fmtDec(cashNeeded)} (~${moisTirelire} mois)`:'Ce mois-ci !';
+    if(tlSeuil) tlSeuil.textContent=seuilStr;
+    if(tlNote)  tlNote.innerHTML=`Chaque mois tu achètes <strong>${partsLabel} à ${fmtDec(cours)}</strong> et tu laisses <strong>${fmtDec(cashPerMonth)} en cash</strong> sur ton PEA. Au bout de ~<strong>${moisTirelire||'?'} mois</strong> (≥ ${fmtDec(cashNeeded)} en cash), tu peux acheter <strong>${partsPerMonth+1} parts d'un coup</strong>. Le surplus repart en cash pour le cycle suivant.`;
+  }
+  // Mettre à jour le code couleur avec le cash saisi
+  updateTirelireCash();
+}
+
+// ══════════════════════════════════
+// ONGLET ETF DYNAMIQUE
+// ══════════════════════════════════
+function updateEtfTab(){
+  const cours=parseFloat(document.getElementById('valoCours')?.value)||currentEpabPrice||40;
+  const budget=monthlyBudgetDCA;
+  const partsPerMonth=Math.floor(budget/cours);
+  const cashPerMonth=+(budget-partsPerMonth*cours).toFixed(2);
+  const cashNeeded=+((partsPerMonth+1)*cours-budget).toFixed(2);
+  const moisTirelire=cashPerMonth>0?Math.ceil(cashNeeded/cashPerMonth):null;
+
+  const etfPrix=document.getElementById('etfPrix');
+  if(!etfPrix) return;
+  etfPrix.textContent=`≈ ${fmtDec(cours)}`;
+
+  const etfDCALabel=document.getElementById('etfDCALabel');
+  const etfDCA=document.getElementById('etfDCA');
+  const etfCash=document.getElementById('etfCash');
+  const etfTirelire=document.getElementById('etfTirelire');
+  const etfNote=document.getElementById('etfNote');
+
+  if(etfDCALabel) etfDCALabel.textContent=`DCA ${fmtDec(budget)}/mois`;
+  const partsLabel=partsPerMonth===1?'1 part/mois':`${partsPerMonth} parts/mois`;
+  if(etfDCA) etfDCA.textContent=partsLabel;
+  if(etfCash) etfCash.textContent=`~${fmtDec(cashPerMonth)}/mois`;
+  if(etfTirelire) etfTirelire.textContent=moisTirelire&&moisTirelire>0?`≥ ${fmtDec(cashNeeded)} (~${moisTirelire} mois)`:'Direct !';
+
+  if(etfNote){
+    const partsLabelLong=partsPerMonth===1?'1 part':`${partsPerMonth} parts`;
+    etfNote.innerHTML=`<strong>🐷 Stratégie Tirelire DCA</strong> — Avec <strong>${fmtDec(budget)}/mois</strong> tu achètes <strong>${partsLabelLong} à ${fmtDec(cours)}</strong> et tu laisses <strong>${fmtDec(cashPerMonth)} en cash</strong> sur ton PEA Fortuneo. Au bout de ~${moisTirelire||'?'} mois (≥ ${fmtDec(cashNeeded)} en cash), tu achètes <strong>${partsPerMonth+1} parts ce mois-là</strong>. Le surplus repart en cash pour le cycle suivant.`;
+  }
 }
 
 // ══════════════════════════════════
