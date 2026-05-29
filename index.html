@@ -733,11 +733,18 @@ async function renderPurchases(){
   const autoCash=Math.max(0,+(count*monthlyBudgetDCA-total).toFixed(2));
   const tlCI=document.getElementById('tlCashInput');
   if(tlCI){ tlCI.value=autoCash.toFixed(2); localStorage.setItem(LS_CASH,tlCI.value); }
-  // Auto-calcul du nombre de parts depuis les achats (total / cours actuel)
+  // Parts réelles : somme des parts enregistrées dans l'historique (priorité absolue)
   const ep=document.getElementById('valoParts');
-  if(ep&&currentEpabPrice>0&&total>0){
-    const estParts=+(total/currentEpabPrice).toFixed(4);
-    ep.value=estParts; localStorage.setItem(LS_P,ep.value);
+  if(ep){
+    const totalShares=data.reduce((s,p)=>s+Number(p.shares||0),0);
+    if(totalShares>0){
+      // On a des parts réelles enregistrées → on les utilise
+      ep.value=totalShares.toFixed(4); localStorage.setItem(LS_P,ep.value);
+    } else if(!ep.value&&currentEpabPrice>0&&total>0){
+      // Aucune part enregistrée ET champ vide → estimation indicative
+      ep.value=+(total/currentEpabPrice).toFixed(4); localStorage.setItem(LS_P,ep.value);
+    }
+    // Si ep.value déjà renseigné manuellement → on ne touche pas
   }
   // Mise à jour du hint avec le cours actuel
   const hint=document.getElementById('valoHint');
@@ -921,17 +928,16 @@ async function fetchEpabPrice(){
     if(p&&p>0){
       currentEpabPrice=p;
       const ec=document.getElementById('valoCours');
-      if(ec&&(!ec.value||Math.abs(parseFloat(ec.value)-p)>0.005)){
-        ec.value=p.toFixed(2);
-        const ts=new Date().toLocaleString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-        localStorage.setItem(LS_C,ec.value);
-        localStorage.setItem(LS_T,ts);
-        const src=document.getElementById('etfCoursSource');
-        if(src) src.textContent='· auto';
-        const hint=document.querySelector('.valo-hint');
-        if(hint) hint.innerHTML=`Cours récupéré automatiquement · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 EPAB sur Google Finance</a> · Mis à jour : ${ts}`;
-        updateValo();
-      }
+      const ts=new Date().toLocaleString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      // Toujours mettre à jour le cours et les indicateurs visuels
+      if(ec){ ec.value=p.toFixed(2); }
+      localStorage.setItem(LS_C,p.toFixed(2));
+      localStorage.setItem(LS_T,ts);
+      const src=document.getElementById('etfCoursSource');
+      if(src) src.textContent='· auto';
+      const hint=document.querySelector('.valo-hint');
+      if(hint) hint.innerHTML=`🔄 Cours récupéré automatiquement · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 Google Finance</a> · Mis à jour : <strong>${ts}</strong>`;
+      updateValo();
     }
   }catch(e){ /* fallback silencieux */ }
 
@@ -1042,6 +1048,8 @@ if('serviceWorker' in navigator){
 
 // INIT
 initAuth();
+// Rafraîchissement automatique du cours toutes les 5 minutes
+setInterval(fetchEpabPrice, 5*60*1000);
 </script>
 </body>
 </html>
