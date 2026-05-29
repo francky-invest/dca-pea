@@ -1,4 +1,4 @@
-const CACHE = 'dca-pea-v23';
+const CACHE = 'dca-pea-v25';
 const ASSETS = [
   './index.html',
   './manifest.json',
