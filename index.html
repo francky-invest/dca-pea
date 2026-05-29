@@ -444,11 +444,21 @@
 
   <div class="card">
     <div class="card-title">Enregistrer un achat EPAB</div>
-    <div class="add-form">
-      <div class="form-group"><label>Date</label><input type="date" id="fDate"/></div>
-      <div class="form-group"><label>Montant (€)</label><input type="number" id="fAmount" value="50" min="0.01" step="0.01"/></div>
-      <div class="form-group"><label>Nb de parts</label><input type="number" id="fShares" placeholder="Ex: 1.0000" min="0" step="0.0001"/></div>
+    <div class="add-form" style="grid-template-columns:1fr 1fr auto;">
+      <div class="form-group">
+        <label>Date <span style="font-weight:400;opacity:.6">(auto)</span></label>
+        <input type="date" id="fDate"/>
+      </div>
+      <div class="form-group">
+        <label>Nb de parts achetées</label>
+        <input type="number" id="fShares" placeholder="Ex: 1" min="1" step="1"
+          oninput="previewAmount()"/>
+      </div>
       <button class="btn-add" id="btnAdd" onclick="addPurchase()">＋ Ajouter</button>
+    </div>
+    <div style="margin-top:10px;font-size:.78rem;color:var(--muted);background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:9px;padding:9px 13px;">
+      💶 Montant auto-calculé : <strong id="fAmountPreview" style="color:var(--accent2)">—</strong>
+      &nbsp;·&nbsp; Cours : <strong id="fCoursPreview" style="color:var(--accent2)">—</strong>
     </div>
   </div>
 
@@ -698,18 +708,28 @@ function renderEtfProjection(){
 // ══════════════════════════════════
 // MON PEA — Supabase CRUD
 // ══════════════════════════════════
+function previewAmount(){
+  const shares=parseFloat(document.getElementById('fShares')?.value)||0;
+  const prev=document.getElementById('fAmountPreview');
+  const cprev=document.getElementById('fCoursPreview');
+  if(cprev) cprev.textContent=currentEpabPrice>0?fmtDec(currentEpabPrice):'N/A';
+  if(prev) prev.textContent=shares>0&&currentEpabPrice>0?fmtDec(+(shares*currentEpabPrice).toFixed(2)):'—';
+}
+
 async function addPurchase(){
   const date=document.getElementById('fDate').value;
-  const amount=parseFloat(document.getElementById('fAmount').value);
-  const shares=parseFloat(document.getElementById('fShares').value)||null;
+  const shares=parseFloat(document.getElementById('fShares').value);
   if(!date){ alert('Merci de saisir une date.'); return; }
-  if(!amount||amount<=0){ alert('Montant invalide.'); return; }
+  if(!shares||shares<=0){ alert('Saisis le nombre de parts achetées.'); return; }
+  if(currentEpabPrice<=0){ alert('Cours EPAB non disponible. Attends le chargement automatique.'); return; }
+  const amount=+(shares*currentEpabPrice).toFixed(2);
   const btn=document.getElementById('btnAdd');
   btn.disabled=true; btn.textContent='…';
   const { error }=await db.from('purchases').insert([{user_id:currentUser.id,date,etf:'EPAB',amount,shares}]);
   btn.disabled=false; btn.textContent='＋ Ajouter';
   if(error){ alert('Erreur : '+error.message); return; }
   document.getElementById('fShares').value='';
+  document.getElementById('fAmountPreview').textContent='—';
   await renderPurchases();
 }
 
@@ -957,6 +977,7 @@ async function fetchEpabPrice(){
 
   updateTirelire();
   updateEtfTab();
+  previewAmount(); // met à jour le preview cours dans le formulaire
 }
 
 // ══════════════════════════════════
@@ -1035,21 +1056,4 @@ function updateEtfTab(){
 
   if(etfNote){
     const partsLabelLong=partsPerMonth===1?'1 part':`${partsPerMonth} parts`;
-    etfNote.innerHTML=`<strong>🐷 Stratégie Tirelire DCA</strong> — Avec <strong>${fmtDec(budget)}/mois</strong> tu achètes <strong>${partsLabelLong} à ${fmtDec(cours)}</strong> et tu laisses <strong>${fmtDec(cashPerMonth)} en cash</strong> sur ton PEA. Au bout de ~${moisTirelire||'?'} mois (≥ ${fmtDec(cashNeeded)} en cash), tu passes <strong>1 seul ordre de ${partsPerMonth+1} parts</strong> (${fmtDec((partsPerMonth+1)*cours)}) — toujours <strong style="color:var(--green)">0 € de frais</strong> sous Fortuneo Starter (< 500 €). Le surplus repart en cash pour le cycle suivant.`;
-  }
-}
-
-// ══════════════════════════════════
-// SERVICE WORKER
-// ══════════════════════════════════
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}
-
-// INIT
-initAuth();
-// Rafraîchissement automatique du cours toutes les 5 minutes
-setInterval(fetchEpabPrice, 5*60*1000);
-</script>
-</body>
-</html>
+    etfNote.innerHTML=`<strong>🐷
