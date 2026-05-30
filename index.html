@@ -767,8 +767,8 @@ async function renderPurchases(){
   }
   // Mise à jour du hint avec le cours actuel
   const hint=document.getElementById('valoHint');
-  if(hint&&currentEpabPrice>0){
-    hint.innerHTML=`Saisie manuelle · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 EPAB sur Google Finance</a> · Cours actuel : <strong>${fmtDec(currentEpabPrice)}</strong>`;
+  if(hint&&currentEpabPrice>0&&!hint.innerHTML.includes('automatiquement')){
+    hint.innerHTML=`<a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 EPAB sur Google Finance</a> · Cours actuel : <strong>${fmtDec(currentEpabPrice)}</strong>`;
   }
   document.getElementById('pkpiCount').textContent=count;
   document.getElementById('pkpiLast').textContent=count?new Date(data[0].date).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—';
@@ -1073,6 +1073,3 @@ if('serviceWorker' in navigator){
 initAuth();
 // Rafraîchissement automatique du cours toutes les 5 minutes
 setInterval(fetchEpabPrice, 5*60*1000);
-</script>
-</body>
-</html>
