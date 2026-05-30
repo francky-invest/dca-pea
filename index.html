@@ -939,10 +939,12 @@ function updateTirelireCash(){
 // FETCH COURS EPAB (Yahoo Finance)
 // ══════════════════════════════════
 async function fetchEpabPrice(){
-  // ── Fetch 1 : prix actuel (rapide, range court) ──
+  // ── Fetch 1 : prix actuel via proxy CORS (contourne les restrictions navigateur) ──
+  const YAHOO_URL='https://query1.finance.yahoo.com/v8/finance/chart/EPAB.PA?interval=1d&range=5d';
+  const PROXY='https://api.allorigins.win/raw?url=';
   try{
-    const r=await fetch('https://query1.finance.yahoo.com/v8/finance/chart/EPAB.PA?interval=1d&range=5d',
-      {signal:AbortSignal.timeout?AbortSignal.timeout(6000):undefined});
+    const r=await fetch(PROXY+encodeURIComponent(YAHOO_URL),
+      {signal:AbortSignal.timeout?AbortSignal.timeout(8000):undefined});
     const j=await r.json();
     const p=j?.chart?.result?.[0]?.meta?.regularMarketPrice;
     if(p&&p>0){
@@ -965,8 +967,9 @@ async function fetchEpabPrice(){
   try{
     const now=Math.floor(Date.now()/1000);
     const p1=now-366*24*3600; // il y a 1 an +1 jour de marge
-    const r2=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/EPAB.PA?interval=1wk&period1=${p1}&period2=${now}`,
-      {signal:AbortSignal.timeout?AbortSignal.timeout(6000):undefined});
+    const YAHOO2=`https://query1.finance.yahoo.com/v8/finance/chart/EPAB.PA?interval=1wk&period1=${p1}&period2=${now}`;
+    const r2=await fetch(PROXY+encodeURIComponent(YAHOO2),
+      {signal:AbortSignal.timeout?AbortSignal.timeout(8000):undefined});
     const j2=await r2.json();
     const closes=j2?.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[];
     const valid=closes.filter(v=>v!=null&&v>0);
