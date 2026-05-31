@@ -278,13 +278,13 @@
     </div>
     <div class="control-group">
       <div class="control-label"><span>Rendement annuel estimé</span><strong id="rateVal">7 %</strong></div>
-      <input type="range" id="rate" min="3" max="15" step="0.5" value="7"/>
-      <div class="slider-ticks"><span>3 %</span><span>7 %</span><span>10 %</span><span>15 %</span></div>
+      <input type="range" id="rate" min="3" max="25" step="0.5" value="7"/>
+      <div class="slider-ticks"><span>3 %</span><span>10 %</span><span>18 %</span><span>25 %</span></div>
     </div>
     <div class="control-group">
       <div class="control-label"><span>Durée d'investissement</span><strong id="yearsVal">10 ans</strong></div>
       <input type="range" id="years" min="1" max="25" step="1" value="10"/>
-      <div class="slider-ticks"><span>1 an</span><span>5 ans</span><span>15 ans</span><span>25 ans</span></div>
+      <div class="slider-ticks"><span>1 an</span><span>9 ans</span><span>17 ans</span><span>25 ans</span></div>
     </div>
   </div>
   <div class="card">
@@ -315,7 +315,7 @@
       <div class="scenario-box s3"><label>🔴 Scénario 3</label><input type="number" id="sc3" value="100" min="1" max="5000"/><div class="scenario-suffix">€ / mois</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-      <div class="control-group" style="margin:0"><div class="control-label"><span>Rendement</span><strong id="scRateVal">7 %</strong></div><input type="range" id="scRate" min="3" max="15" step="0.5" value="7"/><div class="slider-ticks"><span>3 %</span><span>15 %</span></div></div>
+      <div class="control-group" style="margin:0"><div class="control-label"><span>Rendement</span><strong id="scRateVal">7 %</strong></div><input type="range" id="scRate" min="3" max="25" step="0.5" value="7"/><div class="slider-ticks"><span>3 %</span><span>25 %</span></div></div>
       <div class="control-group" style="margin:0"><div class="control-label"><span>Durée</span><strong id="scYearsVal">20 ans</strong></div><input type="range" id="scYears" min="1" max="25" step="1" value="20"/><div class="slider-ticks"><span>1 an</span><span>25 ans</span></div></div>
     </div>
   </div>
@@ -614,7 +614,7 @@ function updateMain(){
   const years=parseInt(document.getElementById('years').value);
   document.getElementById('rateVal').textContent=`${rate} %`;
   document.getElementById('yearsVal').textContent=`${years} an${years>1?'s':''}`;
-  setSliderFill(document.getElementById('rate'),3,15,'var(--accent)');
+  setSliderFill(document.getElementById('rate'),3,25,'var(--accent)');
   setSliderFill(document.getElementById('years'),1,25,'var(--accent2)');
   const {labels,invested,total}=dca(monthly,rate,years);
   const gains=total.map((t,i)=>+(t-invested[i]).toFixed(2));
@@ -649,7 +649,7 @@ function updateScenarios(){
   const years=parseInt(document.getElementById('scYears').value);
   document.getElementById('scRateVal').textContent=`${rate} %`;
   document.getElementById('scYearsVal').textContent=`${years} an${years>1?'s':''}`;
-  setSliderFill(document.getElementById('scRate'),3,15,'var(--accent)');
+  setSliderFill(document.getElementById('scRate'),3,25,'var(--accent)');
   setSliderFill(document.getElementById('scYears'),1,25,'var(--accent2)');
   const d1=dca(s1,rate,years),d2=dca(s2,rate,years),d3=dca(s3,rate,years);
   document.getElementById('th1').textContent=`${s1} €/mois`;
@@ -1039,7 +1039,7 @@ function updateEtfTab(){
     perfInp.value=currentEpabPerf1Y.toFixed(2);
     perfInp.style.color=currentEpabPerf1Y>=0?'var(--green)':'var(--accent3)';
     localStorage.setItem(LS_PERF,perfInp.value);
-    const clampedRate=Math.min(15,Math.max(3,currentEpabPerf1Y));
+    const clampedRate=Math.min(25,Math.max(3,currentEpabPerf1Y));
     const rateEl=document.getElementById('rate');
     const scRateEl=document.getElementById('scRate');
     if(rateEl){ rateEl.value=clampedRate.toFixed(1); }
