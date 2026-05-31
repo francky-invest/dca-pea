@@ -929,19 +929,31 @@ function updateTirelireCash(){
 // FETCH COURS EPAB (Yahoo Finance)
 // ══════════════════════════════════
 async function fetchEpabPrice(){
-  // ── Fetch 1 : prix actuel via proxy CORS (contourne les restrictions navigateur) ──
   const YAHOO_URL='https://query1.finance.yahoo.com/v8/finance/chart/EPAB.PA?interval=1d&range=5d';
-  const PROXY='https://api.allorigins.win/raw?url=';
+  // 3 proxies en course — le plus rapide gagne (timeout 4s chacun)
+  const PROXIES=[
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?',
+    'https://api.codetabs.com/v1/proxy?quest='
+  ];
+  const TO=4000;
+
+  // ── Fetch prix : course entre les 3 proxies ──
   try{
-    const r=await fetch(PROXY+encodeURIComponent(YAHOO_URL),
-      {signal:AbortSignal.timeout?AbortSignal.timeout(8000):undefined});
-    const j=await r.json();
-    const p=j?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if(p&&p>0){
+    const signal=AbortSignal.timeout?AbortSignal.timeout(TO):undefined;
+    const p=await Promise.any(PROXIES.map(proxy=>
+      fetch(proxy+encodeURIComponent(YAHOO_URL),{signal})
+        .then(r=>r.json())
+        .then(j=>{
+          const price=j?.chart?.result?.[0]?.meta?.regularMarketPrice;
+          if(!price||price<=0) throw new Error('no price');
+          return price;
+        })
+    ));
+    if(p>0){
       currentEpabPrice=p;
       const ec=document.getElementById('valoCours');
       const ts=new Date().toLocaleString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      // Toujours mettre à jour le cours et les indicateurs visuels
       if(ec){ ec.value=p.toFixed(2); }
       localStorage.setItem(LS_C,p.toFixed(2));
       localStorage.setItem(LS_T,ts);
@@ -951,22 +963,23 @@ async function fetchEpabPrice(){
       if(hint) hint.innerHTML=`🔄 Cours récupéré automatiquement · <a href="https://www.google.com/finance/quote/EPAB:EPA" target="_blank" rel="noopener">🔍 Google Finance</a> · Mis à jour : <strong>${ts}</strong>`;
       updateValo();
     }
-  }catch(e){ /* fallback silencieux */ }
+  }catch(e){ /* tous les proxies ont échoué — on garde le cache */ }
 
-  // ── Fetch 2 : perf 1 an via timestamps Unix + hebdo (~52 points, fiable) ──
+  // ── Fetch perf 1 an : même course ──
   try{
     const now=Math.floor(Date.now()/1000);
-    const p1=now-366*24*3600; // il y a 1 an +1 jour de marge
+    const p1=now-366*24*3600;
     const YAHOO2=`https://query1.finance.yahoo.com/v8/finance/chart/EPAB.PA?interval=1wk&period1=${p1}&period2=${now}`;
-    const r2=await fetch(PROXY+encodeURIComponent(YAHOO2),
-      {signal:AbortSignal.timeout?AbortSignal.timeout(8000):undefined});
-    const j2=await r2.json();
+    const signal2=AbortSignal.timeout?AbortSignal.timeout(TO):undefined;
+    const j2=await Promise.any(PROXIES.map(proxy=>
+      fetch(proxy+encodeURIComponent(YAHOO2),{signal:signal2}).then(r=>r.json())
+    ));
     const closes=j2?.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[];
     const valid=closes.filter(v=>v!=null&&v>0);
     if(valid.length>=2){
       currentEpabPerf1Y=+((valid[valid.length-1]/valid[0]-1)*100).toFixed(2);
     }
-  }catch(e2){ /* perf reste null → N/A */ }
+  }catch(e2){ /* perf reste null */ }
 
   updateTirelire();
   updateEtfTab();
